@@ -50,7 +50,7 @@
 
 </span>
 
-#### Um projeto desenvolvido durante o bootcamp Generation Brasil. Um forte abraço para todos os colegas e professores que foram parte essencial deste aprendizado. Agradeço pela colaboração, paciência e conhecimento compartilhado.
+#### Um projeto desenvolvido durante o bootcamp Generation Brasil. Um forte abraço para todos os colegas e professores que foram parte essencial deste aprendizado. Agradeço pela colaboração e conhecimento compartilhado.
 
 <br />
 
