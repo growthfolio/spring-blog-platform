@@ -27,18 +27,37 @@ public class BasicSecurityConfig {
     private JwtAuthFilter authFilter;
 
     @Bean
-    UserDetailsService userDetailsService() {
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+            .csrf(csrf -> csrf.disable()) // Nova API para desabilitar CSRF
+            .cors(withDefaults())
+            .sessionManagement(management -> management
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/usuarios/logar").permitAll()
+                .requestMatchers("/usuarios/cadastrar").permitAll()
+                .requestMatchers("/error/**").permitAll()
+                .requestMatchers(HttpMethod.OPTIONS).permitAll()
+                .anyRequest().authenticated())
+            .authenticationProvider(authenticationProvider())
+            .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class)
+            .httpBasic(withDefaults());
 
+        return http.build();
+    }
+
+    @Bean
+    public UserDetailsService userDetailsService() {
         return new UserDetailsServiceImpl();
     }
 
     @Bean
-    PasswordEncoder passwordEncoder() {
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
     @Bean
-    AuthenticationProvider authenticationProvider() {
+    public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
         authenticationProvider.setUserDetailsService(userDetailsService());
         authenticationProvider.setPasswordEncoder(passwordEncoder());
@@ -46,33 +65,8 @@ public class BasicSecurityConfig {
     }
 
     @Bean
-    AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
             throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
-
-    @Bean
-    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-
-    	http
-	        .sessionManagement(management -> management
-	                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-	        		.csrf(csrf -> csrf.disable())
-	        		.cors(withDefaults());
-
-    	http
-	        .authorizeHttpRequests((auth) -> auth
-	                .requestMatchers("/usuarios/logar").permitAll()
-	                .requestMatchers("/usuarios/cadastrar").permitAll()
-	                .requestMatchers("/error/**").permitAll()
-	                .requestMatchers(HttpMethod.OPTIONS).permitAll()
-	                .anyRequest().authenticated())
-	        .authenticationProvider(authenticationProvider())
-	        .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class)
-	        .httpBasic(withDefaults());
-
-		return http.build();
-
-    }
-
 }

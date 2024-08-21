@@ -111,5 +111,19 @@ public class UsuarioControllerTest {
 		assertEquals(HttpStatus.OK, resposta.getStatusCode());
 
 	}
+	
+	@Test
+	@DisplayName("Deletar um Usuário")
+	public void deveDeletarUmUsuario() {
+
+	    Optional<Usuario> usuarioCadastrado = usuarioService.cadastrarUsuario(new Usuario(0L, 
+	        "Carlos Andrade", "carlos_andrade@email.com.br", "carlos123", "-"));
+
+	    ResponseEntity<String> resposta = testRestTemplate
+	        .withBasicAuth("root@root.com", "rootroot")
+	        .exchange("/usuarios/" + usuarioCadastrado.get().getId(), HttpMethod.DELETE, null, String.class);
+
+	    assertEquals(HttpStatus.NO_CONTENT, resposta.getStatusCode());
+	}
 
 }
