@@ -2,7 +2,6 @@ package com.generation.blogpessoal.service;
 
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -19,14 +18,16 @@ import com.generation.blogpessoal.security.JwtService;
 @Service
 public class UsuarioService {
 
-	@Autowired
-	private UsuarioRepository usuarioRepository;
-
-	@Autowired
-	private JwtService jwtService;
-
-	@Autowired
-	private AuthenticationManager authenticationManager;
+	private final UsuarioRepository usuarioRepository;
+	private final JwtService jwtService;
+	private final AuthenticationManager authenticationManager;
+	
+	public UsuarioService(UsuarioRepository usuarioRepository, JwtService jwtService,
+			AuthenticationManager authenticationManager) {
+		this.usuarioRepository = usuarioRepository;
+		this.jwtService = jwtService;
+		this.authenticationManager = authenticationManager;
+	}
 
 	public Optional<Usuario> cadastrarUsuario(Usuario usuario) {
 		if (usuarioRepository.findByUsuario(usuario.getUsuario()).isPresent())

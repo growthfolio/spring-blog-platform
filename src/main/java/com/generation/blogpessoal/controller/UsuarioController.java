@@ -3,7 +3,6 @@ package com.generation.blogpessoal.controller;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -14,10 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
-
 import com.generation.blogpessoal.model.UsuarioLogin;
 import com.generation.blogpessoal.model.Usuario;
 import com.generation.blogpessoal.repository.UsuarioRepository;
@@ -29,18 +25,19 @@ import jakarta.validation.Valid;
 @RequestMapping("/usuarios")
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 public class UsuarioController {
-
-	@Autowired
-	private UsuarioService usuarioService;
-
-	@Autowired
-	private UsuarioRepository usuarioRepository;
+	
+	private final UsuarioService usuarioService;
+	private final UsuarioRepository usuarioRepository;
+	
+	public UsuarioController(UsuarioService usuarioService, UsuarioRepository usuarioRepository) {
+		this.usuarioService = usuarioService;
+		this.usuarioRepository = usuarioRepository;
+	}
 	
 	@GetMapping("/all")
 	public ResponseEntity <List<Usuario>> getAll(){
 		
 		return ResponseEntity.ok(usuarioRepository.findAll());
-		
 	}
 
 	@GetMapping("/{id}")
@@ -77,15 +74,15 @@ public class UsuarioController {
 		
 	}
 	
-	@ResponseStatus(HttpStatus.NO_CONTENT)
 	@DeleteMapping("/{id}")
-	public void delete(@PathVariable Long id) {
-		
-		Optional<Usuario> deleteUsuario = usuarioRepository.findById(id);
-		
-		if(deleteUsuario.isEmpty())
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-		usuarioRepository.deleteById(id);
+	public ResponseEntity<Void> delete(@PathVariable Long id) {
+	    Optional<Usuario> deleteUsuario = usuarioRepository.findById(id);
+	    
+	    if(deleteUsuario.isEmpty())
+	        return ResponseEntity.notFound().build();
+	    
+	    usuarioRepository.deleteById(id);
+	    return ResponseEntity.noContent().build();
 	}
-	
+
 }
