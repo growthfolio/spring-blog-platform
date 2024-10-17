@@ -36,20 +36,20 @@ jobs:
         distribution: 'adopt'
     - name: Maven Build
       run: mvn clean package -Dmaven.test.skip=true  # Executa o build do projeto com Maven, ignorando os testes
-    - name: Login to docker hub
-      uses: docker/login-action@v2.1.0  # Faz login no Docker Hub usando as credenciais armazenadas como segredo
-      with:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}  # Nome de usuário armazenado como segredo
-        password: ${{ secrets.DOCKERHUB_TOKEN }}  # Token do Docker Hub armazenado como segredo
-    - name: Build docker image
-      uses: docker/build-push-action@v3.2.0  # Constrói e envia a imagem Docker para o Docker Hub
-      with:
-        context: .  # Define o contexto de construção (diretório atual)
-        push: true  # Envia a imagem para o Docker Hub
-        tags: |
-          ${{ secrets.DOCKERHUB_USERNAME }}/hellocicd:${{ github.run_number }}  # Tag para a imagem com o número da execução
-          ${{ secrets.DOCKERHUB_USERNAME }}/hellocicd:latest  # Tag mais recente para a imagem
-
+   ### UNCOMENT IF YOU USE DOCKERHUB
+   # - name: Login to docker hub
+   #   uses: docker/login-action@v2.1.0  # Faz login no Docker Hub usando as credenciais armazenadas como segredo
+   #   with:
+   #     username: ${{ secrets.DOCKERHUB_USERNAME }}  # Nome de usuário armazenado como segredo
+   #     password: ${{ secrets.DOCKERHUB_TOKEN }}  # Token do Docker Hub armazenado como segredo
+   #- name: Build docker image
+   #   uses: docker/build-push-action@v3.2.0  # Constrói e envia a imagem Docker para o Docker Hub
+   #   with:
+   #     context: .  # Define o contexto de construção (diretório atual)
+   #     push: true  # Envia a imagem para o Docker Hub
+   #     tags: |
+   #       ${{ secrets.DOCKERHUB_USERNAME }}/hellocicd:${{ github.run_number }}  # Tag para a imagem com o número da execução
+   #       ${{ secrets.DOCKERHUB_USERNAME }}/hellocicd:latest  # Tag mais recente para a imagem
   run_deploy:
     name: CD - Deploy no Render  # Definição do trabalho de deploy
     runs-on: ubuntu-22.04  # Define o ambiente de execução (Ubuntu 22.04)
