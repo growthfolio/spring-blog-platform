@@ -10,7 +10,7 @@ COPY pom.xml .
 COPY src src
 
 # Tornar o Maven Wrapper executável e construir o projeto
-RUN chmod +x ./mvnw
+RUN chmod -R 777 ./mvnw
 RUN ./mvnw install -DskipTests
 
 # Extrair o conteúdo do JAR gerado
@@ -29,8 +29,6 @@ COPY --from=build ${DEPENDENCY}/BOOT-INF/lib /app/lib
 COPY --from=build ${DEPENDENCY}/META-INF /app/META-INF
 COPY --from=build ${DEPENDENCY}/BOOT-INF/classes /app
 
-# Expor a porta padrão do Spring Boot
-EXPOSE 8080
 
 # Comando para rodar a aplicação
 ENTRYPOINT ["java", "-cp", "app:app/lib/*", "com.generation.blogpessoal.BlogpessoalApplication"]
