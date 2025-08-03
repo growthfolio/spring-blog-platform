@@ -1,55 +1,219 @@
+# 📝 Spring Blog Platform - Plataforma de Blog Completa
 
-<div align="center">
+## 🎯 Objetivo de Aprendizado
+Projeto desenvolvido para estudar **Spring Boot** e **arquitetura MVC**, implementando uma plataforma completa de blog com autenticação, CRUD de postagens, segurança com Spring Security e deploy na AWS.
 
-# Blog Pessoal - Java/Spring
+## 🛠️ Tecnologias Utilizadas
+- **Framework:** Spring Boot, Spring Security, Spring Data JPA
+- **Linguagem:** Java 17+
+- **Banco de Dados:** MySQL (dev), PostgreSQL (prod)
+- **Autenticação:** JWT (JSON Web Tokens)
+- **Documentação:** Swagger/OpenAPI
+- **Testes:** JUnit 5
+- **Deploy:** AWS (EC2, RDS, S3)
+- **Conceitos estudados:**
+  - Arquitetura MVC
+  - Spring Security e JWT
+  - JPA/Hibernate e relacionamentos
+  - Testes unitários
+  - Deploy em cloud (AWS)
+  - API RESTful
 
-</div>
+## 🚀 Demonstração
+```java
+// Controller REST com Spring Boot
+@RestController
+@RequestMapping("/postagens")
+@CrossOrigin(origins = "*", allowedHeaders = "*")
+public class PostagemController {
+    
+    @GetMapping
+    public ResponseEntity<List<Postagem>> getAll() {
+        return ResponseEntity.ok(postagemRepository.findAll());
+    }
+    
+    @PostMapping
+    public ResponseEntity<Postagem> post(@Valid @RequestBody Postagem postagem) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(postagemRepository.save(postagem));
+    }
+}
+```
 
-<div align="center">
-    <img src="https://i.imgur.com/w8tTOuT.png" title="source: imgur.com" />
-</div>
+## 💡 Principais Aprendizados
 
-## Descrição do Projeto
+### 🏗️ Arquitetura Spring Boot
+- **Controllers:** Gerenciamento de endpoints REST
+- **Services:** Lógica de negócio e regras
+- **Repositories:** Acesso a dados com JPA
+- **Entities:** Mapeamento objeto-relacional
 
-O **Blog Pessoal** é um projeto open-source desenvolvido em Java utilizando o framework Spring. Ele funciona como uma plataforma completa onde os usuários podem criar, editar e compartilhar postagens de blog. O projeto segue o padrão de arquitetura MVC (Model-View-Controller) e implementa funcionalidades robustas de segurança com o uso do Spring Security.
+### 🔐 Segurança e Autenticação
+- **Spring Security:** Configuração de segurança
+- **JWT:** Tokens para autenticação stateless
+- **BCrypt:** Hash de senhas
+- **CORS:** Configuração para frontend
 
-Este projeto foi desenvolvido durante o bootcamp da Generation Brasil, proporcionando experiência prática no desenvolvimento de uma aplicação full-stack com ênfase nas tecnologias de back-end.
+### 📊 Banco de Dados e JPA
+- **Relacionamentos:** @OneToMany, @ManyToOne
+- **Validações:** Bean Validation (@Valid, @NotNull)
+- **Queries:** JPQL e métodos derivados
+- **Migrations:** Controle de schema
 
-## 💻 Tecnologias Utilizadas
+## 🧠 Conceitos Técnicos Estudados
 
-- **Frameworks:** Spring, Hibernate, JPA, Spring Security e JUnit.
-- **Persistência de Dados:** MySQL para desenvolvimento e PostgreSQL para produção (RDS).
-- **Transmissão de Dados:** Formato JSON para comunicação com a API.
-- **Arquitetura:** Padrão MVC.
-- **Segurança:** Implementada com Spring Security.
-- **Testes:** Testes unitários com JUnit na classe `Usuario`.
-- **Principais Dependências:** Spring Web, Spring Boot Devtools, Validation, Spring Data JPA, MySQL Driver, JSON Web Token, JUnit, H2 Database, Spring Doc, PostgreSQL.
-- **Documentação da API:** Swagger UI.
+### 1. **Entidades JPA**
+```java
+@Entity
+@Table(name = "tb_postagens")
+public class Postagem {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    
+    @NotBlank(message = "O atributo título é obrigatório")
+    @Size(min = 5, max = 100)
+    private String titulo;
+    
+    @ManyToOne
+    @JsonIgnoreProperties("postagem")
+    private Tema tema;
+    
+    @ManyToOne
+    @JsonIgnoreProperties("postagem")
+    private Usuario usuario;
+}
+```
 
-## 📋 Explore a Documentação Swagger
+### 2. **Spring Security Configuration**
+```java
+@Configuration
+@EnableWebSecurity
+public class BasicSecurityConfig {
+    
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        return http
+            .sessionManagement(management -> management
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .csrf(csrf -> csrf.disable())
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/usuarios/logar").permitAll()
+                .requestMatchers("/usuarios/cadastrar").permitAll()
+                .anyRequest().authenticated())
+            .authenticationProvider(authenticationProvider())
+            .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class)
+            .build();
+    }
+}
+```
 
-A documentação Swagger fornece detalhes abrangentes sobre os endpoints da API, modelos de dados e como interagir com a aplicação.
+### 3. **Testes Unitários**
+```java
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@DisplayName("Testes da Classe UsuarioController")
+class UsuarioControllerTest {
+    
+    @Test
+    @DisplayName("Deve criar um novo usuário")
+    public void deveCriarNovoUsuario() {
+        HttpEntity<Usuario> corpoRequisicao = new HttpEntity<Usuario>(usuario);
+        
+        ResponseEntity<Usuario> corpoResposta = testRestTemplate
+            .exchange("/usuarios/cadastrar", HttpMethod.POST, 
+                     corpoRequisicao, Usuario.class);
+        
+        assertEquals(HttpStatus.CREATED, corpoResposta.getStatusCode());
+    }
+}
+```
 
-Para acessar a documentação completa, confira o arquivo Swagger disponível [aqui](https://github.com/growthfolio/spring-blog-platform/blob/main/blogpessoal_swagger_docs/Projeto%20Blog%20Pessoal.pdf).
+## 📁 Estrutura do Projeto
+```
+spring-blog-platform/
+├── src/main/java/
+│   └── com/generation/blogpessoal/
+│       ├── controller/          # Controllers REST
+│       ├── model/              # Entidades JPA
+│       ├── repository/         # Repositórios de dados
+│       ├── security/           # Configurações de segurança
+│       └── service/            # Serviços de negócio
+├── src/test/java/              # Testes unitários
+├── blogpessoal_swagger_docs/   # Documentação Swagger
+└── target/                     # Build artifacts
+```
 
-## 🔎 Diagrama de Classes
+## 🔧 Como Executar
 
-![Diagrama de Classes](https://www.planttext.com/api/plantuml/svg/jLD1JiCm4Bpd5JuQeNoW1rHGBqWz8D4-O6KlmSAnaRsMA8Y-7TknawP4HKXmIRAJyUpiPBFs18v2hnkXmNksmnxOHyDOovHaAxQrfikLH2-S4c0Z-4XE5VZLHe4E-qHLdjZneG37-FgQTKYtMlEhMjmTxYLFcb7z1DnKSJv8Jzq6KkgIdF5iZ-Abu64HbgYHCByPUtqsPS9gS75AKXJqsOY4RsHdY0I2T4Y0ta1if7eip6XZbJFCTV01d4fo--7fDvdiifKQo61iIgDEmSTnwfSOa_c9SZ6bOdWn96Dxd4Sq3Ne2UZJFC8UUBFtr_a0WD1HNnHNBlDotjbEcEil5S42014_k6xzIYom5qEhz0kiygjpYl-CY-u9cWgA7lFfjUpFkTLETpi0r6fd-yYy0)
+### Pré-requisitos
+- Java 17+
+- Maven 3.6+
+- MySQL (desenvolvimento)
 
-## 🌐 Demonstração ao Vivo
+### Passos
+1. Clone o repositório:
+```bash
+git clone <repo-url>
+cd spring-blog-platform
+```
 
-Você pode acessar a versão publicada do projeto [aqui](https://main.d3tf7gxlu2utwn.amplifyapp.com/).
+2. Configure o banco de dados no `application.properties`:
+```properties
+spring.datasource.url=jdbc:mysql://localhost:3306/db_blogpessoal
+spring.datasource.username=root
+spring.datasource.password=root
+```
 
-## 🚀 Deploy na AWS
+3. Execute a aplicação:
+```bash
+mvn spring-boot:run
+```
 
-A aplicação foi implantada em uma instância EC2 da AWS, garantindo um ambiente seguro e escalável para execução em produção. O deploy utilizou os seguintes recursos:
+4. Acesse a documentação Swagger:
+```
+http://localhost:8080/swagger-ui.html
+```
 
-- **Instância EC2:** Configurada para hospedar o back-end.
-- **Banco de Dados PostgreSQL:** Hospedado no Amazon RDS para persistência em produção.
-- **Upload de Fotos:** Gerenciado com Amazon S3 para armazenamento e AWS Lambda para geração de URLs assinadas para upload seguro.
-- **Segurança:** Configuração de regras de firewall via grupos de segurança para acesso restrito à aplicação.
-- **Porta de Acesso:** O back-end está configurado para operar na porta 8080.
+## 🌐 Deploy AWS
+- **EC2:** Instância para hospedar a aplicação
+- **RDS PostgreSQL:** Banco de dados em produção
+- **S3:** Armazenamento de imagens
+- **Lambda:** URLs assinadas para upload seguro
 
-## 🙏 Agradecimentos
+## 🚧 Desafios Enfrentados
+1. **Spring Security:** Configuração de JWT e CORS
+2. **Relacionamentos JPA:** Mapeamento correto entre entidades
+3. **Testes:** Configuração de ambiente de teste
+4. **Deploy AWS:** Configuração de infraestrutura cloud
+5. **CORS:** Integração com frontend React
 
-Este projeto foi desenvolvido durante o bootcamp da Generation Brasil. Meu agradecimento a todos os colegas e instrutores que foram parte essencial desta jornada de aprendizado. A colaboração e o conhecimento compartilhado foram inestimáveis.
+## 📚 Recursos Utilizados
+- [Spring Boot Documentation](https://spring.io/projects/spring-boot)
+- [Spring Security Reference](https://spring.io/projects/spring-security)
+- [JPA/Hibernate Guide](https://hibernate.org/orm/documentation/)
+- [AWS Documentation](https://docs.aws.amazon.com/)
+- [Generation Brasil Bootcamp](https://brazil.generation.org/) - Bootcamp onde o projeto foi desenvolvido
+
+## 📈 Próximos Passos
+- [ ] Implementar sistema de comentários
+- [ ] Adicionar categorias e tags
+- [ ] Criar dashboard administrativo
+- [ ] Implementar notificações por email
+- [ ] Adicionar sistema de likes/dislikes
+- [ ] Melhorar cobertura de testes
+
+## 🔗 Projetos Relacionados
+- [React E-commerce](../react-ecommerce-tt/) - Frontend integrado
+- [Sistema Bancário](../contabancaria/) - Base de POO
+- [Java Generation Notes](../java-generation-notes/) - Fundamentos estudados
+
+---
+
+**Desenvolvido por:** Felipe Macedo  
+**Contato:** contato.dev.macedo@gmail.com  
+**GitHub:** [FelipeMacedo](https://github.com/felipemacedo1)  
+**LinkedIn:** [felipemacedo1](https://linkedin.com/in/felipemacedo1)
+
+> 💡 **Reflexão:** Este projeto consolidou meus conhecimentos em Spring Boot e arquiteturas enterprise. A experiência com Spring Security, JPA e deploy na AWS foi fundamental para entender desenvolvimento backend profissional.
